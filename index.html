@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IBF – Ingénierie & Santé Connectée</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root{
+      --accent:#6decb9;
+      --bg:#0d1117;
+      --card:#161b22;
+      --text:#f5f5f5;
+      --muted:#aaa;
+    }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Nunito Sans', sans-serif;
+      color: var(--text);
+      background-color: var(--bg);
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+      position: relative;
+    }
+
+    /* === Fond animé racinaire === */
+    canvas#network-bg {
+      position: fixed;
+      inset: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      background: radial-gradient(circle at 50% 60%, #0d1117 0%, #091013 100%);
+    }
+
+    /* === Halo respirant === */
+    .halo {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px; height: 800px;
+      background: radial-gradient(circle, rgba(109,236,185,0.25) 0%, rgba(0,0,0,0) 70%);
+      border-radius: 50%;
+      filter: blur(100px);
+      animation: breathe 6s ease-in-out infinite;
+      z-index: 0;
+      pointer-events: none;
+    }
+    @keyframes breathe {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+      50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+    }
+
+    header {
+      position: fixed; width: 100%; top: 0; left: 0;
+      background: rgba(13,17,23,0.85);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    nav { display: flex; justify-content: space-between; align-items: center; max-width: 1100px; margin: 0 auto; padding: 0.8rem 2rem; }
+    nav ul { display: flex; list-style: none; gap: 1.2rem; }
+    nav a { text-decoration: none; color: #fff; font-weight: 500; transition: color .3s; }
+    nav a:hover { color: var(--accent); }
+    .btn-contact { background: var(--accent); color: #0d1117; padding: .55rem 1.0rem; border-radius: 6px; font-weight: 700; transition: background .3s; }
+    .btn-contact:hover { background: #8ef6c2; }
+
+    section { padding: 6rem 2rem; max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
+    h1, h2, h3 { font-family: 'Poppins', sans-serif; }
+    .section-title { font-size: 2rem; margin-bottom: 1rem; text-align: center; }
+    .section-subtitle { text-align: center; max-width: 800px; margin: 0 auto 3rem; color: var(--muted); }
+
+    /* Hero */
+    .hero {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; min-height: 100vh; background: transparent;
+      padding-top: 8.5rem;
+    }
+    .hero img {
+      width: 220px; margin-bottom: 1.4rem;
+      filter: drop-shadow(0 0 10px rgba(109,236,185,0.4));
+      animation: float 5s ease-in-out infinite;
+    }
+    @keyframes float { 0%, 100% { transform: translateY(0);} 50% { transform: translateY(-8px);} }
+    .hero h1 { font-size: 2.7rem; margin-bottom: 0.75rem; }
+    .hero p { max-width: 760px; line-height: 1.7; color: #ccc; }
+    .badges { margin-top: 1.2rem; display: flex; flex-wrap: wrap; gap: .6rem; justify-content: center; }
+    .badge { background: rgba(109,236,185,0.1); border: 1px solid var(--accent); border-radius: 20px; padding: .3rem .8rem; font-size: .9rem; }
+
+    /* Cards / grids */
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit,minmax(250px,1fr)); gap: 1.6rem; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); gap: 1.6rem; }
+    .card { background: var(--card); border-radius: 12px; padding: 1.6rem; border: 1px solid rgba(255,255,255,0.06); transition: transform .35s, border .35s; }
+    .card:hover { transform: translateY(-4px); border-color: var(--accent); }
+    .card h3 { color: var(--accent); margin-bottom: .5rem; }
+
+    /* Project detail blocks */
+    .project-detail { display: grid; grid-template-columns: 1.1fr 1fr; gap: 2rem; align-items: start; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; padding: 1.6rem; }
+    .project-detail .meta { display: grid; gap: .6rem; }
+    .project-detail ul { padding-left: 1.2rem; color:#ccc; }
+    .tag { display:inline-block; font-size: .8rem; padding:.18rem .55rem; border:1px solid var(--accent); color:var(--accent); border-radius:999px; margin-bottom:.4rem; }
+
+    /* Team section */
+    .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.4rem; }
+    .avatar { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); margin: 0 auto 0.6rem; display:block; }
+
+    /* Contact */
+    form { display: grid; gap: 0.8rem; max-width: 540px; margin: 0 auto; }
+    input, textarea { background: #0d1117; border: 1px solid #333; border-radius: 8px; padding: .85rem; color: #fff; font-family: 'Nunito Sans', sans-serif; }
+    input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+    button { background: var(--accent); border: none; color: #0d1117; font-weight: 700; border-radius: 8px; padding: .9rem; cursor: pointer; transition: background .3s; }
+    button:hover { background: #8ef6c2; }
+
+    footer { text-align: center; padding: 3rem 1rem; color: #777; font-size: .9rem; border-top: 1px solid rgba(255,255,255,0.05); position: relative; z-index: 1; }
+
+    /* Scroll reveal (subtil) */
+    [data-animate]{ opacity:0; transform: translateY(10px); transition: opacity .8s ease, transform .8s ease; }
+    [data-animate].visible{ opacity:1; transform: translateY(0); }
+    @media (max-width: 640px){
+      .hero h1{ font-size: 2.1rem; }
+      nav ul{ gap:.8rem; }
+      .project-detail{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="network-bg"></canvas>
+  <div class="halo"></div>
+
+  <header>
+    <nav>
+      <img src="assets/IBF-Logo Couleur_RVB.png" alt="IBF logo" style="height:38px;">
+      <ul>
+        <li><a href="#vision">Vision</a></li>
+        <li><a href="#skills">Savoir‑faire</a></li>
+        <li><a href="#projects">Projets</a></li>
+        <li><a href="#details">Détails</a></li>
+        <li><a href="#team">Équipe</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <a href="#contact" class="btn-contact">Nous contacter</a>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <img src="assets/IBF-Logo Couleur_Négatif_RVB.png" alt="Logo IBF">
+    <h1 data-animate>Préserver la vie, du cœur à la forêt</h1>
+    <p data-animate>IBF est une entreprise française de R&D orientée santé et premiers secours. Nos technologies écoutent, captent et partagent les signaux vitaux de l’humain et de la nature pour protéger ce qui compte le plus : la vie.</p>
+    <div class="badges" data-animate>
+      <div class="badge">Santé</div>
+      <div class="badge">Secours</div>
+      <div class="badge">Environnement</div>
+      <div class="badge">Interopérabilité</div>
+    </div>
+  </section>
+
+  <!-- VISION -->
+  <section id="vision">
+    <h2 class="section-title" data-animate>Notre vision</h2>
+    <p class="section-subtitle" data-animate>Nous croyons en une technologie humble, fiable et respectueuse. Qu’il s’agisse d’un sauveteur sur le terrain ou d’un médecin à distance, d’une forêt menacée ou d’un réseau de capteurs, notre mission reste la même : <strong>transmettre les informations vitales avec justesse, fiabilité et humanité.</strong></p>
+  </section>
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <h2 class="section-title" data-animate>Nos savoir‑faire</h2>
+    <div class="grid-3">
+      <div class="card" data-animate>
+        <h3>Ingénierie pour la santé et le secours</h3>
+        <p>Nous concevons des dispositifs capables d’apporter des données fiables aux équipes médicales et de terrain, même dans les environnements extrêmes.</p>
+      </div>
+      <div class="card" data-animate>
+        <h3>Connectivité éthique et sécurisée</h3>
+        <p>Nos architectures garantissent la confidentialité et la souveraineté des données. La connectivité doit servir la mission, jamais la complexifier.</p>
+      </div>
+      <div class="card" data-animate>
+        <h3>Observation du vivant</h3>
+        <p>De la physiologie humaine à l’écosystème naturel, nous captons, consolidons et partageons les signaux essentiels à la protection de la vie et de son environnement.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS OVERVIEW -->
+  <section id="projects">
+    <h2 class="section-title" data-animate>Nos projets</h2>
+    <div class="grid-3">
+      <div class="card" data-animate>
+        <span class="tag">Medical Device</span>
+        <h3>StétoClear</h3>
+        <p>Écouter le cœur et les poumons même au milieu du bruit. Conçu pour les équipes de secours et les soignants, StétoClear restitue une clarté sonore inédite et permet un partage sécurisé des auscultations.</p>
+      </div>
+      <div class="card" data-animate>
+        <span class="tag">Middleware</span>
+        <h3>RhizOs</h3>
+        <p>Le lien invisible entre les soignants, les machines et les données. RhizOs relie les dispositifs médicaux, assurant sécurité, continuité et interopérabilité pour que les acteurs de santé se concentrent sur soigner.</p>
+      </div>
+      <div class="card" data-animate>
+        <span class="tag">IoT Souverain</span>
+        <h3>SymbIoT</h3>
+        <p>Un réseau sensible à la nature. SymbIoT veille sur les forêts, détecte les menaces et communique localement pour protéger l’humain et son environnement sans dépendre d’un cloud étranger.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS DETAILS -->
+  <section id="details">
+    <h2 class="section-title" data-animate>Détails des projets</h2>
+    <p class="section-subtitle" data-animate>Trois briques, une même mission : capter, protéger et partager les informations vitales.</p>
+
+    <!-- StétoClear -->
+    <div class="project-detail" data-animate>
+      <div>
+        <span class="tag">StétoClear</span>
+        <h3>Clarté d’auscultation en environnement bruyant</h3>
+        <p>Développé pour les équipes de secours et le corps médical, StétoClear permet d’acquérir, d’écouter et de partager des auscultations avec une clarté exceptionnelle, même au milieu du bruit grâce à notre système breveté d'annulation active de bruits auto adaptatif. Les enregistrements suivent une nomenclature stricte pour faciliter la traçabilité et la transmission appuyé par une aide au positionnement en Réalité Augmentée.</p>
+      </div>
+      <div class="meta">
+        <strong>Points clefs</strong>
+        <ul>
+          <li>Capture audio haute fidélité et traitement du signal embarqué</li>
+		  <li>Aide à l'auscultation via notre moteur de réalité augmenté breveté</li>
+          <li>Flux : acquisition → conversion → partage sécurisé</li>
+          <li>Mode Research/Training disponible avant marquage CE</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- RhizOs -->
+    <div class="project-detail" data-animate style="margin-top:1.2rem;">
+      <div>
+        <span class="tag">RhizOs</span>
+        <h3>Le “système racinaire” de l’interopérabilité médicale</h3>
+        <p>RhizOs est un middleware qui connecte en silence dispositifs, capteurs et applications. Il unifie les communications et prend en charge sécurité, gouvernance des données et continuité de service, pour libérer les équipes médicales de la complexité technique.</p>
+      </div>
+      <div class="meta">
+        <strong>Points clefs</strong>
+        <ul>
+          <li>Auto‑détection de rôle Hub / Client</li>
+          <li>Interopérabilité edge ↔ cloud sécurisée</li>
+          <li>Architecture modulaire, prête pour le licensing B2B</li>
+          <li>Système de sécurisation Unique Keypulse</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SymbIoT -->
+    <div class="project-detail" data-animate style="margin-top:1.2rem;">
+      <div>
+        <span class="tag">SymbIoT</span>
+        <h3>Un réseau vivant pour protéger les forêts</h3>
+        <p>SymbIoT met en place un maillage de capteurs qui dialoguent localement pour surveiller les milieux naturels, détecter des risques et alerter. Basée sur un architecture maillée, le système réduit la dépendance aux clouds  et agit comme une sentinelle au service des territoires.</p>
+      </div>
+      <div class="meta">
+        <strong>Points clefs</strong>
+        <ul>
+          <li>Découverte automatique des objets et réseau local résilient</li>
+          <li>Communication temps réel et supervision légère</li>
+          <li>Priorité à la sobriété et à l’autonomie énergétique</li>
+		  <li>Système de sécurisation Unique Keypulse</li>
+          <li>Scénarios de prévention (incendies, pollutions, sécheresse)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM -->
+  <section id="team">
+    <h2 class="section-title" data-animate>Notre équipe</h2>
+    <p class="section-subtitle" data-animate>Des profils complémentaires, un même engagement : mettre l’ingénierie au service de la vie et du secours.</p>
+    <div class="team-grid">
+      <div class="card" data-animate>
+        <img class="avatar" src="assets/sandra.jpg" alt="Sandra - PDG">
+        <h3>Sandra GUERRIR</h3>
+        <p style="color:#ddd;margin:.2rem 0 .4rem;">Présidente, Associée principale</p>
+        <p>Vision stratégique et engagement humain. Sandra pilote la direction générale et assure la représentation institutionnelle d’IBF.</p>
+      </div>
+      <div class="card" data-animate>
+        <img class="avatar" src="assets/magali.jpg" alt="Magali - DAF">
+        <h3>Magali NEVEU</h3>
+        <p style="color:#ddd;margin:.2rem 0 .4rem;">Directrice Administrative et Financière</p>
+        <p>Rigueur et clarté. Magali veille à l’équilibre financier et à la structuration administrative des projets innovants d’IBF.</p>
+      </div>
+      <div class="card" data-animate>
+        <img class="avatar" src="assets/cyrille.jpg" alt="Cyrille - Directeur Général">
+        <h3>Cyrille LECROQ</h3>
+        <p style="color:#ddd;margin:.2rem 0 .4rem;">Directeur Général, Responsable R&D</p>
+        <p>Ingénieur R&D passionné, Cyrille conçoit et pilote les projets technologiques d’IBF. Il est à l’origine de StétoClear, RhizOs et SymbIoT.</p>
+      </div>
+      <div class="card" data-animate>
+        <img class="avatar" src="assets/theo.jpg" alt="Théo - Développeur Web">
+        <h3>Théo XAVIER</h3>
+        <p style="color:#ddd;margin:.2rem 0 .4rem;">Développeur Web</p>
+        <p>Théo assure le développement des interfaces et des connectivités web, contribuant à l’interopérabilité et à la fluidité des systèmes IBF.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <h2 class="section-title" data-animate>Contact</h2>
+    <p class="section-subtitle" data-animate>Une question, un projet ou une collaboration ? Parlons‑en. Ensemble, faisons progresser la technologie au service de la vie.</p>
+    <form action="mailto:contact@ibf.fr" method="post" enctype="text/plain" data-animate>
+      <input type="text" name="nom" placeholder="Votre nom" required>
+      <input type="email" name="email" placeholder="Votre email" required>
+      <textarea name="message" rows="5" placeholder="Votre message"></textarea>
+      <button type="submit">Envoyer</button>
+    </form>
+  </section>
+
+  <footer>
+    © 2025 IBF — Ingénierie & Santé Connectée. Tous droits réservés.
+  </footer>
+
+  <script>
+    /* === Réseau racinaire animé === */
+    const canvas = document.getElementById('network-bg');
+    const ctx = canvas.getContext('2d');
+    let width, height, nodes;
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      const density = Math.max(18, Math.floor(width * height / 15000));
+      nodes = Array.from({ length: density }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.28,
+        vy: (Math.random() - 0.5) * 0.28
+      }));
+    }
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+      for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i];
+        n.x += n.vx; n.y += n.vy;
+        if (n.x < 0 || n.x > width) n.vx *= -1;
+        if (n.y < 0 || n.y > height) n.vy *= -1;
+      }
+      // lignes
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const a = nodes[i], b = nodes[j];
+          const dx = a.x - b.x, dy = a.y - b.y, d = Math.hypot(dx, dy);
+          if (d < 120) {
+            ctx.strokeStyle = `rgba(109,236,185,${0.05 + (120 - d)/120 * 0.10})`;
+            ctx.lineWidth = 0.5;
+            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          }
+        }
+      }
+      // noeuds
+      ctx.fillStyle = 'rgba(109,236,185,0.7)';
+      for (const n of nodes) { ctx.beginPath(); ctx.arc(n.x, n.y, 1.2, 0, Math.PI * 2); ctx.fill(); }
+      requestAnimationFrame(draw);
+    }
+    window.addEventListener('resize', resize);
+    resize(); draw();
+
+    // Désactiver/Alléger sur mobile pour performance
+    const mq = window.matchMedia('(max-width: 640px)');
+    if (mq.matches) {
+      // baisser densité
+      nodes = nodes.slice(0, Math.floor(nodes.length * 0.6));
+    }
+
+    /* === Scroll reveal (subtil) === */
+    const obs = new IntersectionObserver((entries)=>{
+      for (const e of entries) {
+        if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+      }
+    }, { threshold: 0.12 });
+    document.querySelectorAll('[data-animate]').forEach(el => obs.observe(el));
+  </script>
+</body>
+</html>
